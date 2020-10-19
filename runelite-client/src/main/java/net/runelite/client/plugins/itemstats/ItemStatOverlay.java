@@ -30,12 +30,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.time.Duration;
-import net.runelite.api.Client;
-import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.InventoryID;
-import net.runelite.api.Item;
-import net.runelite.api.ItemContainer;
-import net.runelite.api.MenuEntry;
+
+import net.runelite.api.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
@@ -265,16 +261,25 @@ public class ItemStatOverlay extends Overlay
 		if (value != 0 || diffValue != 0)
 		{
 			final String changeStr = getChangeString(diffValue, inverse, showPercent);
-
+			final String valueStr = QuantityFormatter.formatNumber(value);
 			if (config.alwaysShowBaseStats() && showBase)
 			{
-				final String valueStr = QuantityFormatter.formatNumber(value);
 				b.append(label).append(": ").append(valueStr).append((!changeStr.isEmpty() ? " (" + changeStr + ") " : "")).append("</br>");
 			}
 			else if (!changeStr.isEmpty())
 			{
 				b.append(label).append(": ").append(changeStr).append("</br>");
 			}
+
+//			if (config.showWeight() && label.equals("Weight")){
+//				if (diffValue > 0) {
+//					System.out.println("weight above 0");
+//					b.append(label).append(": ").append(valueStr).append("</br>");
+//				} else {
+//					System.out.println("weight below 0");
+//					b.append(label).append(": ").append(" (").append(changeStr).append(")").append("</br>");
+//				}
+//			}
 		}
 
 		return b.toString();
@@ -286,6 +291,11 @@ public class ItemStatOverlay extends Overlay
 		return item != null ? itemManager.getItemStats(item.getId(), false) : null;
 	}
 
+	private boolean isOnWornEquipmentTab()
+	{
+		return client.getVar(VarClientInt.INVENTORY_TAB) == 4;
+	}
+
 	@VisibleForTesting
 	String buildStatBonusString(ItemStats s)
 	{
@@ -293,6 +303,7 @@ public class ItemStatOverlay extends Overlay
 		// Used if switching into a 2 handed weapon to store off-hand stats
 		ItemStats offHand = null;
 		final ItemEquipmentStats currentEquipment = s.getEquipment();
+		boolean weaponSlot = false;
 
 		ItemContainer c = client.getItemContainer(InventoryID.EQUIPMENT);
 		if (s.isEquipable() && currentEquipment != null && c != null)
@@ -311,13 +322,14 @@ public class ItemStatOverlay extends Overlay
 					{
 						// Account for speed change when two handed weapon gets removed
 						// shield - (2h - unarmed) == shield - 2h + unarmed
-						other = otherEquip.isTwoHanded() ? other.subtract(UNARMED) : null;
+						other = otherEquip.isTwoHanded() ? other.subtract(UNARMED, isOnWornEquipmentTab(), true) : null;
 					}
 				}
 			}
 
 			if (slot == EquipmentInventorySlot.WEAPON.getSlotIdx())
 			{
+				weaponSlot = true;
 				if (other == null)
 				{
 					other = UNARMED;
@@ -331,7 +343,7 @@ public class ItemStatOverlay extends Overlay
 			}
 		}
 
-		final ItemStats subtracted = s.subtract(other).subtract(offHand);
+		final ItemStats subtracted = s.subtract(other, isOnWornEquipmentTab(), weaponSlot).subtract(offHand, isOnWornEquipmentTab(), weaponSlot);
 		final ItemEquipmentStats e = subtracted.getEquipment();
 
 		final StringBuilder b = new StringBuilder();

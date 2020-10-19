@@ -38,7 +38,7 @@ public class ItemStats
 
 	private ItemEquipmentStats equipment;
 
-	public ItemStats subtract(ItemStats other)
+	public ItemStats subtract(ItemStats other, boolean onWornEquipmentTab, boolean weaponSlot)
 	{
 		if (other == null)
 		{
@@ -49,33 +49,59 @@ public class ItemStats
 		final ItemEquipmentStats newEquipment;
 
 
-		if (other.equipment != null)
+		if (other.equipment != null && !onWornEquipmentTab)
 		{
 			final ItemEquipmentStats equipment = this.equipment != null
 				? this.equipment
 				: new ItemEquipmentStats.ItemEquipmentStatsBuilder().build();
 
-			newEquipment = new ItemEquipmentStats.ItemEquipmentStatsBuilder()
-				.slot(equipment.getSlot())
-				.astab(equipment.getAstab() - other.equipment.getAstab())
-				.aslash(equipment.getAslash() - other.equipment.getAslash())
-				.acrush(equipment.getAcrush() - other.equipment.getAcrush())
-				.amagic(equipment.getAmagic() - other.equipment.getAmagic())
-				.arange(equipment.getArange() - other.equipment.getArange())
-				.dstab(equipment.getDstab() - other.equipment.getDstab())
-				.dslash(equipment.getDslash() - other.equipment.getDslash())
-				.dcrush(equipment.getDcrush() - other.equipment.getDcrush())
-				.dmagic(equipment.getDmagic() - other.equipment.getDmagic())
-				.drange(equipment.getDrange() - other.equipment.getDrange())
-				.str(equipment.getStr() - other.equipment.getStr())
-				.rstr(equipment.getRstr() - other.equipment.getRstr())
-				.mdmg(equipment.getMdmg() - other.equipment.getMdmg())
-				.prayer(equipment.getPrayer() - other.equipment.getPrayer())
-				.aspeed(equipment.getAspeed() - other.equipment.getAspeed())
-				.build();
+				newEquipment = new ItemEquipmentStats.ItemEquipmentStatsBuilder()
+						.slot(equipment.getSlot())
+						.astab(equipment.getAstab() - other.equipment.getAstab())
+						.aslash(equipment.getAslash() - other.equipment.getAslash())
+						.acrush(equipment.getAcrush() - other.equipment.getAcrush())
+						.amagic(equipment.getAmagic() - other.equipment.getAmagic())
+						.arange(equipment.getArange() - other.equipment.getArange())
+						.dstab(equipment.getDstab() - other.equipment.getDstab())
+						.dslash(equipment.getDslash() - other.equipment.getDslash())
+						.dcrush(equipment.getDcrush() - other.equipment.getDcrush())
+						.dmagic(equipment.getDmagic() - other.equipment.getDmagic())
+						.drange(equipment.getDrange() - other.equipment.getDrange())
+						.str(equipment.getStr() - other.equipment.getStr())
+						.rstr(equipment.getRstr() - other.equipment.getRstr())
+						.mdmg(equipment.getMdmg() - other.equipment.getMdmg())
+						.prayer(equipment.getPrayer() - other.equipment.getPrayer())
+						.aspeed(equipment.getAspeed() - other.equipment.getAspeed())
+						.build();
+			System.out.println("inventory items");
+			System.out.println(other.equipment);
 		}
-		else
+		else if(onWornEquipmentTab)
 		{
+			final ItemEquipmentStats equipment = this.equipment != null
+					? this.equipment
+					: new ItemEquipmentStats.ItemEquipmentStatsBuilder().build();
+
+			newEquipment = new ItemEquipmentStats.ItemEquipmentStatsBuilder()
+					.slot(equipment.getSlot())
+					.astab(-equipment.getAstab())
+					.aslash(-equipment.getAslash())
+					.acrush(-equipment.getAcrush())
+					.amagic(-equipment.getAmagic())
+					.arange(-equipment.getArange())
+					.dstab(-equipment.getDstab())
+					.dslash(-equipment.getDslash())
+					.dcrush(-equipment.getDcrush())
+					.dmagic(-equipment.getDmagic())
+					.drange(-equipment.getDrange())
+					.str(-equipment.getStr())
+					.rstr(-equipment.getRstr())
+					.mdmg(-equipment.getMdmg())
+					.prayer(-equipment.getPrayer())
+					.aspeed(-equipment.getAspeed() + (weaponSlot ? 4  : 0))
+					.build();
+			System.out.println("working in equipment tabs!");
+		} else {
 			newEquipment = equipment;
 		}
 
